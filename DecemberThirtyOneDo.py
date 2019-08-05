@@ -11,12 +11,12 @@ import statsmodels.api as sm
 from sklearn.covariance import EllipticEnvelope
 from sklearn import svm
 
-#»¬¶¯Æ½¾ùÍ¼
+#æ»‘åŠ¨å¹³å‡å›¾
 def draw_trend(ts, size):
     f = plt.figure()
-    #»¬¶¯Æ½¾ù
+    #æ»‘åŠ¨å¹³å‡
     rol_mean = ts.rolling(window=size).mean()
-    #¼ÓÈ¨»¬¶¯Æ½¾ù
+    #åŠ æƒæ»‘åŠ¨å¹³å‡
     rol_weighted_mean = pd.ewma(ts, span=size)
 
     ts.plot(color='blue',label='Original')
@@ -28,10 +28,10 @@ def draw_trend(ts, size):
 
 
 
-# adf¼ìÑéÆ½ÎÈĞÔ
+# adfæ£€éªŒå¹³ç¨³æ€§
 def testStationarity(ts):
     dftest = adfuller(ts)
-    # ¶ÔÉÏÊöº¯ÊıÇóµÃµÄÖµ½øĞĞÓïÒåÃèÊö
+    # å¯¹ä¸Šè¿°å‡½æ•°æ±‚å¾—çš„å€¼è¿›è¡Œè¯­ä¹‰æè¿°
     dfoutput = pd.Series(dftest[0:4], index=['Test Statistic','p-value','#Lags Used','Number of Observations Used'])
     for key,value in dftest[4].items():
         dfoutput['Critical Value (%s)'%key] = value
@@ -39,20 +39,20 @@ def testStationarity(ts):
 # print(testStationarity(ts))
 
 def validation(ts_a,ts_b,ts_c):
-    # µ¥Î»¸ù¼ìÑéÆ½ÎÈĞÔ
+    # å•ä½æ ¹æ£€éªŒå¹³ç¨³æ€§
     df = pd.DataFrame()
     df = pd.concat([ts_a, ts_b, ts_c], axis=1).dropna()
     df.columns = ['a', 'b', 'c']
 
-    # ¼ÇÂ¼Ã¿¸ö·ÖÁ¿µÄ½×Êı
+    # è®°å½•æ¯ä¸ªåˆ†é‡çš„é˜¶æ•°
     adf_jieshu = {}
-    # ĞèÒª½øĞĞÒ»½×²î·ÖµÄcolumns
+    # éœ€è¦è¿›è¡Œä¸€é˜¶å·®åˆ†çš„columns
     diff_columns = []
-    # ĞèÒª½øĞĞ¶ş½×²î·ÖµÄcolumns
+    # éœ€è¦è¿›è¡ŒäºŒé˜¶å·®åˆ†çš„columns
     diff_diff_columns = []
-    # ½øĞĞ¶ş½×²î·Öºó»¹²»Æ½ÎÈµÄcolumns
+    # è¿›è¡ŒäºŒé˜¶å·®åˆ†åè¿˜ä¸å¹³ç¨³çš„columns
     other_columns = []
-    # Ô­Ê¼Êı¾İµÄpÖµ
+    # åŸå§‹æ•°æ®çš„på€¼
     adf_test_p = [adfuller(df[column])[1] for column in df.columns]
     for i in range(len(adf_test_p)):
         if (adf_test_p[i] < 0.05):
@@ -60,7 +60,7 @@ def validation(ts_a,ts_b,ts_c):
             adf_jieshu[0].append(df.columns[i])
         else:
             diff_columns.append(df.columns[i])
-    # Ò»½×²î·ÖºóµÄpÖµ
+    # ä¸€é˜¶å·®åˆ†åçš„på€¼
     adf_test_p = [adfuller(df[column].diff().dropna())[1] for column in diff_columns]
     for i in range(len(adf_test_p)):
         if (adf_test_p[i] < 0.05):
@@ -68,7 +68,7 @@ def validation(ts_a,ts_b,ts_c):
             adf_jieshu[1].append(diff_columns[i])
         else:
             diff_diff_columns.append(df.columns[i])
-    # ¶ş½×²î·ÖºóµÄpÖµ
+    # äºŒé˜¶å·®åˆ†åçš„på€¼
     adf_test_p = [adfuller(df[column].diff().dropna().diff().dropna())[1] for column in diff_diff_columns]
     for i in range(len(adf_test_p)):
         if (adf_test_p[i] < 0.01):
@@ -77,15 +77,15 @@ def validation(ts_a,ts_b,ts_c):
         else:
             other_columns.append(df.columns[i])
 
-    # ¶Ô½×ÊıÏàÍ¬µÄÊ±¼äĞòÁĞ½øĞĞĞ­Õû¼ìÑé
-    # Ğ­Õû¼ìÑéµÄ½á¹û²»Âú×ã¶Ô³ÆĞÔÂğ£¿ÕâÀïµÄpÖµ²»ÏàµÈ
+    # å¯¹é˜¶æ•°ç›¸åŒçš„æ—¶é—´åºåˆ—è¿›è¡Œåæ•´æ£€éªŒ
+    # åæ•´æ£€éªŒçš„ç»“æœä¸æ»¡è¶³å¯¹ç§°æ€§å—ï¼Ÿè¿™é‡Œçš„på€¼ä¸ç›¸ç­‰
     coint_test_p_0 = coint(df['a'], df['c'])[1]
     coint_test_p_1 = coint(df['c'], df['a'])[1]
     # coint_test_p_2 = coint([df[column] for column in adf_jieshu[2]])[1]
     # coint_test_p_0 = coint([df[column] for column in adf_jieshu[0]])[1]
     # coint_test_p_1 = coint([df[column] for column in adf_jieshu[1]])[1]
     # coint_test_p_2 = coint([df[column] for column in adf_jieshu[2]])[1]
-    # ¼ÆËãÏàÍ¬½×ÊıµÄÁĞµÄ
+    # è®¡ç®—ç›¸åŒé˜¶æ•°çš„åˆ—çš„
     print(adf_jieshu[0])
     print(coint_test_p_0)
     print(adf_jieshu[1])
@@ -132,7 +132,7 @@ def isolateForestDetection(clm_select,all_tss, df_data,plot=False):
         for kind in all_tss[col].keys():
             j += 1
             X = np.array(all_tss[col][kind])
-            # ¹ÂÁ¢É­ÁÖ
+            # å­¤ç«‹æ£®æ—
             clf = IsolationForest(contamination=outliers_fraction, random_state=rng)
             clf.fit(X)
             y_pred = clf.predict(X)
@@ -201,7 +201,7 @@ def LOFDetection(clm_select, all_tss, df_data,plot=False):
         for kind in all_tss[col].keys():
             j += 1
             X = np.array(all_tss[col][kind])
-            # LOF Ëã·¨
+            # LOF ç®—æ³•
             clf = LocalOutlierFactor(n_neighbors=35,contamination=0.25)
             y_pred = clf.fit_predict(X)
             lof_pred[col].extend(y_pred)
@@ -223,13 +223,13 @@ def SHESDDetection(clm_select, all_tss, df_data,plot=False):
         j = 1
         # shesd_pred[col] = [1] * len()
         err_indices = []
-        # µ±Ç° ´ØµÄÆğÊ¼Î»ÖÃ£¬Ëæ×Åkind¶ø±ä»¯
+        # å½“å‰ ç°‡çš„èµ·å§‹ä½ç½®ï¼Œéšç€kindè€Œå˜åŒ–
         cur_index = 0
         for kind in all_tss[col].keys():
             j += 1
             tmp = np.array(all_tss[col][kind])
             X = np.array(tmp[:,1])
-            # SHESD Ëã·¨
+            # SHESD ç®—æ³•
             anomaly_indices = seasonal_esd(X, hybrid=True, max_anomalies=200)
             anomaly_indices = [k + cur_index for k in anomaly_indices]
             err_indices.extend(anomaly_indices)
@@ -301,7 +301,7 @@ def EllipticEnvelopeDetection(clm_select, all_tss, df_data,plot=False):
     return ee_pred
 
 if __name__ == '__main__':
-    # ¶ÁÈ¡Êı¾İÎªDataFrame¸ñÊ½
+    # è¯»å–æ•°æ®ä¸ºDataFrameæ ¼å¼
     # df_data = pd.read_csv("./smallwindmachine.csv", index_col=0).iloc[0:5000]
     df_data = pd.read_csv("./smallwindmachine.csv", index_col=0)
     df_val = DataFrame({'val':range(len(df_data))},index=df_data.index)
@@ -310,12 +310,12 @@ if __name__ == '__main__':
     clm_select = [df_data.columns[num] for num in clm_select_num]
     print(clm_select)
 
-    # Ê¹ÓÃMINI_BATCH_K_means
+    # ä½¿ç”¨MINI_BATCH_K_means
     cluster_pred = mini_batch_k_means_cluster(df_data, clm_select,plot=False)
-    # Ê¹ÓÃdbscan
+    # ä½¿ç”¨dbscan
     # cluster_pred = dbscan_cluster(df_data, clm_select)
 
-    # ËùÓĞÊ±¼äĞòÁĞµÄËùÓĞ»®·Ö£¬¸ñÊ½Îª{col1:tss,col2:tss},tssÎª{kind1:ts1,kind2:ts2,...},tsÎª[index1,value1;index2,value2;...]
+    # æ‰€æœ‰æ—¶é—´åºåˆ—çš„æ‰€æœ‰åˆ’åˆ†ï¼Œæ ¼å¼ä¸º{col1:tss,col2:tss},tssä¸º{kind1:ts1,kind2:ts2,...},tsä¸º[index1,value1;index2,value2;...]
     all_tss= {}
     for i in range(len(cluster_pred)):
         col = clm_select[i]
@@ -327,9 +327,9 @@ if __name__ == '__main__':
             else:
                 all_tss[col][curKind].append([df_data['val'][j],df_data[col][j]])
 
-    # ÔËÓÃÈıÖÖ·½·¨¼ì²âÒì³£
+    # è¿ç”¨ä¸‰ç§æ–¹æ³•æ£€æµ‹å¼‚å¸¸
 
-    # ¹ÂÁ¢É­ÁÖ
+    # å­¤ç«‹æ£®æ—
     iforest_pred = isolateForestDetection(clm_select, all_tss, df_data,plot=True)
 
     # Seasonal Hybrid ESD
@@ -360,24 +360,24 @@ if __name__ == '__main__':
 
 
 
-    # ÏÂÃæÊÇ¶Ô¶àÔªÊ±¼äĞòÁĞµÄÏà¹ØĞÔ¼ìÑé
-    # # ¼ÆËãÃ¿¸öÊ±¼äĞòÁĞµÄ»®·ÖÇé¿ö
+    # ä¸‹é¢æ˜¯å¯¹å¤šå…ƒæ—¶é—´åºåˆ—çš„ç›¸å…³æ€§æ£€éªŒ
+    # # è®¡ç®—æ¯ä¸ªæ—¶é—´åºåˆ—çš„åˆ’åˆ†æƒ…å†µ
     # for i in len(clm_select_num):
     #     cluster_detail={}
     #     clm = clm_select[i]
-    #     # µ±Ç°clm»®·ÖµÄ´ØÊıÄ¿
+    #     # å½“å‰clmåˆ’åˆ†çš„ç°‡æ•°ç›®
     #     cnt=0
     #     for j in len(cluster_pred[i]):
     #         kind = cluster_pred[i][j]
     #         if not (kind in cluster_detail.keys()):
-    #             # µÚÒ»¸ö±íÊ¾ÆğÊ¼Î»ÖÃ£¬µÚ¶ş¸ö±íÊ¾ÖÕ½áÎ»ÖÃ£¬ÆğÊ¼²»¶¯£¬¸üĞÂÖÕ½á
+    #             # ç¬¬ä¸€ä¸ªè¡¨ç¤ºèµ·å§‹ä½ç½®ï¼Œç¬¬äºŒä¸ªè¡¨ç¤ºç»ˆç»“ä½ç½®ï¼Œèµ·å§‹ä¸åŠ¨ï¼Œæ›´æ–°ç»ˆç»“
     #             cnt = cnt + 1
     #             cluster_detail[clm][kind] = [j,j]
     #         else:
     #             cluster_detail[clm][kind][1] = j
     #     cluster_detail[clm]['cnt'] = cnt
 
-    # Á½¶ÎÊ±¼äĞòÁĞµÄÆğÖ¹·¶Î§²îÖµ²»³¬¹ı100µÄÊ±ºò£¬¿ÉÒÔ½øĞĞĞ­Õû¼ìÑé
+    # ä¸¤æ®µæ—¶é—´åºåˆ—çš„èµ·æ­¢èŒƒå›´å·®å€¼ä¸è¶…è¿‡100çš„æ—¶å€™ï¼Œå¯ä»¥è¿›è¡Œåæ•´æ£€éªŒ
     # MAX_DIFF = 100
     # for clm1 in clm_select:
     #     for clm2 in clm_select:
@@ -389,7 +389,7 @@ if __name__ == '__main__':
     #     dt = cluster_detail[clm]
 
 
-    # Ñ¡È¡ÁĞ
+    # é€‰å–åˆ—
     # ts_a = df_data.iloc[:, clm_select_num[0]]
     # ts_b = df_data.iloc[:, clm_select_num[1]]
     # ts_c = df_data.iloc[:, clm_select_num[2]]
@@ -403,7 +403,7 @@ if __name__ == '__main__':
     # print(len(X))
     # print(type(X))
 
-    # ¼ìÑéÆ½ÎÈĞÔºÍÏà¹ØĞÔ£¬µ¥Î»¸ù¼ìÑéÓĞĞ©Âı£¬Ïà¹ØĞÔºÜ¿ì
+    # æ£€éªŒå¹³ç¨³æ€§å’Œç›¸å…³æ€§ï¼Œå•ä½æ ¹æ£€éªŒæœ‰äº›æ…¢ï¼Œç›¸å…³æ€§å¾ˆå¿«
     # validation(ts_a, ts_b, ts_c)
 
 
